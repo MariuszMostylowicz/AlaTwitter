@@ -1,16 +1,25 @@
-package model;
+package Models;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import org.hibernate.annotations.CreationTimestamp;
+
+import javax.persistence.*;
 import java.util.Date;
 @Entity
+@Table(name = "tweet")
 public class Tweet {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private AppUser author;
     private String message;
+    @Column(name = "published_at")
+    @CreationTimestamp
     private Date publishedAt;
+
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinColumn(name = "author_fk")    //Dodaj kolumne
+    private AppUser author;
+
 
     public Tweet() {
     }
