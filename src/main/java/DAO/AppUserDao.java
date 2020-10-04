@@ -1,8 +1,7 @@
 package DAO;
 
-import Models.AppUser;
+import models.AppUser;
 
-import java.util.HashMap;
 import java.util.HashSet;
 
 public interface AppUserDao {
@@ -28,7 +27,6 @@ public interface AppUserDao {
     void follow(AppUser logged, AppUser userToFollow);
 
     void unfollow(AppUser logged, AppUser userToFollow);
-
 
 
 

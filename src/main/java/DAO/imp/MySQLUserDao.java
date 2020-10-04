@@ -1,18 +1,20 @@
 package DAO.imp;
 
-import DAO.AbstractAppUserDao;
+import DAO.AbstractMySQLDao;
 import DAO.AppUserDao;
-import Models.AppUser;
+import models.AppUser;
 
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public class MySQLUserDao extends AbstractAppUserDao implements AppUserDao {
+public class MySQLUserDao extends AbstractMySQLDao implements AppUserDao {
     @Override
     public HashSet<AppUser> getAll() {
-        TypedQuery<AppUser> getAll = em.createQuery("from AppUser u", AppUser.class);
+        TypedQuery<AppUser> getAll = em.createQuery("from AppUser u where u.isActive = true", AppUser.class);
         List<AppUser> resultList = getAll.getResultList();
         return new HashSet<>(resultList);
     }
@@ -29,8 +31,9 @@ public class MySQLUserDao extends AbstractAppUserDao implements AppUserDao {
 
     @Override
     public void deleteUser(AppUser user) {
-        unfollowedBeforeDelete(user);
-        hibernateUtil.delete(AppUser.class, user.getId());
+        //unfollowedBeforeDelete(user);
+        //hibernateUtil.delete(AppUser.class, user.getId());
+        user.setActive(false);
     }
 
     @Override
@@ -62,16 +65,18 @@ public class MySQLUserDao extends AbstractAppUserDao implements AppUserDao {
 
     @Override
     public HashSet<AppUser> getNotFollowedUsers(AppUser loggedUser) {
-        Query query = em.createQuery("select u from AppUser u where u not in :followed");
+        TypedQuery<AppUser> query = em.createQuery(
+                "select u from AppUser u where u not in :followed and u.isActive = true", AppUser.class);
         query.setParameter("followed", new HashSet(loggedUser.getFollowing()));
         return new HashSet(query.getResultList());
     }
 
     @Override
     public HashSet<AppUser> getFollowers(AppUser loggedUser) {
-        Query query = em.createQuery("select followers from AppUser u where u.id = :userId");
+        TypedQuery<AppUser> query = em.createQuery("select followers from AppUser u where u.id = :userId", AppUser.class);
         query.setParameter("userId", loggedUser.getId());
-        return new HashSet<>(query.getResultList());
+        Set<AppUser> followers = query.getResultList().stream().filter(u -> u.isActive()).collect(Collectors.toSet());
+    return new HashSet<>(followers);
     }
 
     @Override
