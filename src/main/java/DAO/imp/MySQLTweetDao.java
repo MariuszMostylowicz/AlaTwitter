@@ -4,14 +4,11 @@ import DAO.AbstractMySQLDao;
 import DAO.TweetDao;
 import models.AppUser;
 import models.Tweet;
-
-
 import javax.persistence.TypedQuery;
-
 import java.util.List;
+import java.util.Optional;
 
 public class MySQLTweetDao extends AbstractMySQLDao implements TweetDao {
-
 
     @Override
     public void save(Tweet tweet) {
@@ -31,7 +28,8 @@ public class MySQLTweetDao extends AbstractMySQLDao implements TweetDao {
     }
 
     @Override
-    public Tweet getTweet(Long id) {
-        return em.find(Tweet.class, id);
-    }
+    public Optional<Tweet> getTweet(Long id) {
+            return Optional.ofNullable(em.find(Tweet.class, id));
+
+        }
 }
