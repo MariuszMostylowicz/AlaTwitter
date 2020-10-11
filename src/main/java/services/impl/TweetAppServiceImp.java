@@ -4,6 +4,7 @@ import DAO.AppUserDao;
 import DAO.TweetDao;
 import errors.ValidationError;
 import models.AppUser;
+import models.Tweet;
 import services.TweetAppService;
 
 import java.util.ArrayList;
@@ -70,6 +71,20 @@ public class TweetAppServiceImp implements TweetAppService {
         return appUserDao.getFollowers(user);
     }
 
+    @Override
+    public void follow(AppUser currentUser, AppUser toFollow) {
+        appUserDao.follow(currentUser, toFollow);
+    }
+
+    @Override
+    public void unfollow(AppUser currentUser, AppUser toStopFollow) {
+        appUserDao.unfollow(currentUser, toStopFollow);
+    }
+    @Override
+    public List<Tweet> getUserTweets(AppUser user) {
+       return tweetDao.getUserTweets(user);
+    }
+
     private boolean isUserLoginInUse(String userLogin) {
         return appUserDao
                 .getUserByLogin(userLogin)
@@ -83,5 +98,14 @@ public class TweetAppServiceImp implements TweetAppService {
                 .isPresent();
     }
 
+    @Override
+    public void addTweet(String userLogin, String message) {
+        Tweet tweet = new Tweet(userLogin, message);
+        tweetDao.save(tweet);
+    }
 
+    @Override
+    public void deleteTweet(Long tweetId) {
+        tweetDao.delete(tweetId);
+    }
 }
