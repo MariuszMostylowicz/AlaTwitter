@@ -5,11 +5,9 @@ import DAO.AppUserDao;
 import models.AppUser;
 
 import javax.persistence.NoResultException;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MySQLUserDao extends AbstractMySQLDao implements AppUserDao {
@@ -79,18 +77,18 @@ public class MySQLUserDao extends AbstractMySQLDao implements AppUserDao {
 
     @Override
     public HashSet<AppUser> getNotFollowedUsers(AppUser loggedUser) {
-        TypedQuery<AppUser> query = em.createQuery(
-                "select u from AppUser u where u not in :followed and u.isActive = true", AppUser.class);
-        query.setParameter("followed", new HashSet(loggedUser.getFollowing()));
-        return new HashSet(query.getResultList());
+        Query query = em.createQuery("select u from AppUser u where u.login != :login");
+        query.setParameter("login", loggedUser.getLogin());
+        HashSet<AppUser> appUsers = new HashSet<AppUser>(query.getResultList());
+        appUsers.removeAll(loggedUser.getFollowing());
+        return appUsers;
     }
-
     @Override
     public HashSet<AppUser> getFollowers(AppUser loggedUser) {
-        TypedQuery<AppUser> query = em.createQuery("select followers from AppUser u where u.id = :userId", AppUser.class);
+        Query query = em.createQuery("select followers from AppUser u where u.id = :userId");
         query.setParameter("userId", loggedUser.getId());
-        Set<AppUser> followers = query.getResultList().stream().filter(u -> u.isActive()).collect(Collectors.toSet());
-        return new HashSet<>(followers);
+        ArrayList<AppUser> followers = new ArrayList<>(query.getResultList());
+        return followers.stream().filter(user -> user.isActive()).collect(Collectors.toCollection(HashSet::new));
     }
 
     @Override
